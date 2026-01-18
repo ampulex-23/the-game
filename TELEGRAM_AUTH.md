@@ -1,45 +1,45 @@
-# Telegram Login Widget Integration
+# Интеграция Telegram Login Widget
 
-## Overview
+## Обзор
 
-This project uses [Telegram Login Widget](https://core.telegram.org/widgets/login) for user authentication. Users log in via Telegram, and the app can send messages to them through a bot.
+Проект использует [Telegram Login Widget](https://core.telegram.org/widgets/login) для авторизации пользователей. Пользователи входят через Telegram, после чего приложение может отправлять им сообщения через бота.
 
-## Prerequisites
+## Требования
 
-1. **Telegram Bot** - Create via [@BotFather](https://t.me/BotFather)
-2. **Domain with HTTPS** - Required for production (Telegram only allows HTTPS origins)
+1. **Telegram Bot** — создаётся через [@BotFather](https://t.me/BotFather)
+2. **Домен с HTTPS** — обязателен для продакшена (Telegram разрешает только HTTPS)
 
-## Setup Steps
+## Настройка
 
-### 1. Create Telegram Bot
+### 1. Создание Telegram бота
 
-1. Open [@BotFather](https://t.me/BotFather) in Telegram
-2. Send `/newbot` and follow instructions
-3. Save the **Bot Token** (e.g., `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
-4. Send `/setdomain` to set allowed domains for the login widget
+1. Откройте [@BotFather](https://t.me/BotFather) в Telegram
+2. Отправьте `/newbot` и следуйте инструкциям
+3. Сохраните **Bot Token** (например, `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`)
+4. Отправьте `/setdomain` для настройки разрешённых доменов
 
-### 2. Configure Bot Domain
+### 2. Настройка домена бота
 
-In BotFather:
+В BotFather:
 ```
 /setdomain
 @your_bot_name
 https://yourdomain.com
 ```
 
-### 3. Server Configuration
+### 3. Конфигурация сервера
 
-Update `server.js` with your bot token:
+Обновите `server.js`, указав токен бота:
 
 ```javascript
 const BOT_TOKEN = 'YOUR_BOT_TOKEN'
 ```
 
-## How It Works
+## Как это работает
 
 ### Frontend (App.jsx)
 
-The login widget is loaded dynamically:
+Виджет загружается динамически:
 
 ```javascript
 const script = document.createElement('script')
@@ -50,31 +50,31 @@ script.setAttribute('data-onauth', 'onTelegramAuth(user)')
 script.setAttribute('data-request-access', 'write')
 ```
 
-**Key attributes:**
-- `data-telegram-login` - Bot username (without @)
-- `data-size` - Widget size: `small`, `medium`, `large`
-- `data-onauth` - Callback function name
-- `data-request-access` - Request permission to send messages (`write`)
+**Ключевые атрибуты:**
+- `data-telegram-login` — username бота (без @)
+- `data-size` — размер виджета: `small`, `medium`, `large`
+- `data-onauth` — имя callback-функции
+- `data-request-access` — запрос разрешения на отправку сообщений (`write`)
 
-### Callback Handler
+### Обработчик callback
 
 ```javascript
 window.onTelegramAuth = (user) => {
-  // user object contains:
-  // - id: Telegram user ID
-  // - first_name: User's first name
-  // - last_name: User's last name (optional)
-  // - username: Telegram username (optional)
-  // - photo_url: Profile photo URL (optional)
-  // - auth_date: Authentication timestamp
-  // - hash: Verification hash
+  // Объект user содержит:
+  // - id: Telegram ID пользователя
+  // - first_name: Имя пользователя
+  // - last_name: Фамилия (опционально)
+  // - username: Telegram username (опционально)
+  // - photo_url: URL фото профиля (опционально)
+  // - auth_date: Timestamp авторизации
+  // - hash: Хеш для верификации
   onLogin(user)
 }
 ```
 
-### Backend Verification
+### Верификация на сервере
 
-The server verifies authentication using HMAC-SHA256:
+Сервер проверяет авторизацию с помощью HMAC-SHA256:
 
 ```javascript
 function verifyTelegramAuth(authData) {
@@ -96,9 +96,9 @@ function verifyTelegramAuth(authData) {
 }
 ```
 
-### Sending Messages
+### Отправка сообщений
 
-After authentication, the app can send messages via Telegram Bot API:
+После авторизации приложение может отправлять сообщения через Telegram Bot API:
 
 ```javascript
 await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -114,34 +114,34 @@ await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
 
 ## API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/bot-info` | GET | Returns bot username |
-| `/api/auth/telegram` | POST | Verifies Telegram auth data |
-| `/api/send-message` | POST | Sends message to user |
+| Endpoint | Метод | Описание |
+|----------|-------|----------|
+| `/api/bot-info` | GET | Возвращает username бота |
+| `/api/auth/telegram` | POST | Верифицирует данные авторизации |
+| `/api/send-message` | POST | Отправляет сообщение пользователю |
 
-## Security Notes
+## Безопасность
 
-1. **Never expose BOT_TOKEN** on the frontend
-2. **Always verify** auth data on the backend
-3. **Check auth_date** - reject old authentications (>24h)
-4. **Use HTTPS** in production
+1. **Никогда не раскрывайте BOT_TOKEN** на фронтенде
+2. **Всегда проверяйте** данные авторизации на бэкенде
+3. **Проверяйте auth_date** — отклоняйте старые авторизации (>24ч)
+4. **Используйте HTTPS** в продакшене
 
-## Troubleshooting
+## Решение проблем
 
-### Widget not appearing
-- Check if bot domain is configured in BotFather
-- Ensure HTTPS is used in production
+### Виджет не появляется
+- Проверьте, настроен ли домен в BotFather
+- Убедитесь, что используется HTTPS в продакшене
 
-### Authentication fails
-- Verify BOT_TOKEN is correct
-- Check if auth_date is not expired
+### Авторизация не проходит
+- Проверьте правильность BOT_TOKEN
+- Проверьте, не истёк ли auth_date
 
-### Messages not sending
-- User must have started a conversation with the bot first
-- Check if `data-request-access="write"` is set
+### Сообщения не отправляются
+- Пользователь должен сначала начать диалог с ботом
+- Проверьте, установлен ли `data-request-access="write"`
 
-## References
+## Ссылки
 
-- [Telegram Login Widget Docs](https://core.telegram.org/widgets/login)
+- [Документация Telegram Login Widget](https://core.telegram.org/widgets/login)
 - [Telegram Bot API](https://core.telegram.org/bots/api)
